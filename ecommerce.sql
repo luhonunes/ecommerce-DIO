@@ -1,105 +1,97 @@
-CREATE DATABASE ecommerce;
+CREATE DATABASE ecommerce CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE ecommerce;
 
+CREATE TABLE client (
+    idclient INT AUTO_INCREMENT PRIMARY KEY,
+    Fname VARCHAR(50),
+    Minit CHAR(2),
+    Lname VARCHAR(50),
+    CPF VARCHAR(11) NOT NULL,
+    Address VARCHAR(100),
+    CONSTRAINT unique_cpf_client UNIQUE (CPF)
+) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
---criar tebela cliente
-create table client (
-        idclient  serial primary key,
-        Fname varchar(10),
-        Minit char(2),
-        Lname varchar(20),
-        CPF char(11) not null,
-        Address varchar(30),
-        constraint unique_cpf_client unique (CPF)
-    );
-
---criar tabela produto
 CREATE TABLE product (
-    idProduct serial primary key,
-    Pname varchar(10) not null,
-    classification_kids boolean default false,
-    category varchar(20) not null,
-    avaliacao float default 0,
-    size varchar(10),
-    constraint unique_idproduct unique (idProduct),
-    constraint check_category check (category in ('Eletronico', 'Vestimenta', 'Brinquedos', 'Alimentos', 'Móveis'))
-);
+    idProduct INT AUTO_INCREMENT PRIMARY KEY,
+    Pname VARCHAR(100) NOT NULL,
+    classification_kids BOOLEAN DEFAULT FALSE,
+    category VARCHAR(20) NOT NULL,
+    avaliacao FLOAT DEFAULT 0,
+    size VARCHAR(10),
+    CONSTRAINT check_category CHECK (category IN ('Eletronico', 'Vestimenta', 'Brinquedos', 'Alimentos', 'Móveis'))
+) ENGINE=InnoDB;
 
--- criar tabela pagamentos
-create table payments(
-        idclient int,
-        idPayment int,
-        typePayment varchar not null,
-        limitAvallable float,
-        primary key(idclient, idpayment),
-        constraint check_typePayment check (typePayment in (  'Boleto','Cartão','Dois cartoes'))
-    ); 
+CREATE TABLE payments (
+    idclient INT,
+    idPayment INT,
+    typePayment VARCHAR(20) NOT NULL,
+    limitAvallable FLOAT,
+    PRIMARY KEY (idclient, idPayment),
+    CONSTRAINT check_typePayment CHECK (typePayment IN ('Boleto', 'Cartão', 'Dois cartoes'))
+) ENGINE=InnoDB;
 
---criar tabela pedido
 CREATE TABLE orders (
-    idorder serial primary key,
-    idOrderClient int,
-    orderStatus varchar(20) not null,
-    orderDescription varchar(255),
-    sendValue float default 10,
-    paymentCash bool default false,
-    constraint fk_orders_client foreign key (idOrderClient) references client (idclient),
-    constraint check_orderStatus check (orderStatus in ( 'Cancelado',' Confirmado ', ' En processamento'))
-);
+    idorder INT AUTO_INCREMENT PRIMARY KEY,
+    client_id INT, -- Renomeie a coluna para "client_id"
+    orderStatus VARCHAR(20) NOT NULL,
+    orderDescription VARCHAR(255),
+    sendValue FLOAT DEFAULT 10,
+    paymentCash BOOL DEFAULT FALSE,
+    CONSTRAINT fk_orders_client FOREIGN KEY (client_id) REFERENCES client (idclient),
+    CONSTRAINT check_orderStatus CHECK (orderStatus IN ('Cancelado', 'Confirmado', 'Em processamento')) -- Corrected the orderStatus value
+) ENGINE=InnoDB;
 
 CREATE TABLE productStorage (
-    idProdStorage serial primary key,
-    storageLocation varchar(255),
-    quantity int default 0
-);
+    idProdStorage INT AUTO_INCREMENT PRIMARY KEY,
+    storageLocation VARCHAR(255),
+    quantity INT DEFAULT 0
+) ENGINE=InnoDB;
 
 CREATE TABLE supplier (
-    idsupplier serial primary key,
-    SocialName varchar(255) not null,
-    CNPJ char(15) not null,
-    contact char(11) not null,
-    constraint unique_supplier unique (CNPJ)
-);
+    idsupplier INT AUTO_INCREMENT PRIMARY KEY,
+    SocialName VARCHAR(255) NOT NULL,
+    CNPJ VARCHAR(15) NOT NULL,
+    contact CHAR(11) NOT NULL,
+    CONSTRAINT unique_supplier UNIQUE (CNPJ)
+) ENGINE=InnoDB;
 
 CREATE TABLE seller (
-    idseller serial primary key,
-    SocialName varchar(255) not null,
-    AbstName varchar(255),
-    CNPT char(15),
-    CPF char(9),
-    location varchar(255),
-    contact char(11) not null,
-    constraint unique_cnpj_seller unique (CNPT),
-    constraint unique_cpf_seller unique (CPF)
-);
+    idseller INT AUTO_INCREMENT PRIMARY KEY,
+    SocialName VARCHAR(255) NOT NULL,
+    AbstName VARCHAR(255),
+    CNPT VARCHAR(15),
+    CPF VARCHAR(9),
+    location VARCHAR(255),
+    contact CHAR(11) NOT NULL,
+    CONSTRAINT unique_cnpj_seller UNIQUE (CNPT),
+    CONSTRAINT unique_cpf_seller UNIQUE (CPF)
+) ENGINE=InnoDB;
 
 CREATE TABLE productSeller (
-    idPseller int,
-    idProduct int,
-    prodQuantity int default 1,
-    primary key (idPseller, idProduct),
-    constraint fk_product_seller foreign key (idPseller) references seller (idseller),
-    constraint fk_product_product foreign key (idProduct) references product (idProduct)
-);
+    idPseller INT,
+    idProduct INT,
+    prodQuantity INT DEFAULT 1,
+    PRIMARY KEY (idPseller, idProduct),
+    CONSTRAINT fk_product_seller FOREIGN KEY (idPseller) REFERENCES seller (idseller),
+    CONSTRAINT fk_product_product FOREIGN KEY (idProduct) REFERENCES product (idProduct)
+) ENGINE=InnoDB;
 
 CREATE TABLE productorder (
-    idPOproduct int,
-    idPOorder int,
-    poQuantity int default 1,
-    poStatus varchar(20) default 'Disponível',
-    primary key (idPOproduct, idPOorder),
-    constraint fk_productorder_product foreign key (idPOproduct) references product (idProduct),
-    constraint fk_productorder_order foreign key (idPOorder) references orders (idorder),
-    constraint check_poStatus check (poStatus in ( 'Disponível',' Sem estoque'))
-    
-);
+    idPOproduct INT,
+    idPOorder INT,
+    poQuantity INT DEFAULT 1,
+    poStatus VARCHAR(20) DEFAULT 'Disponível',
+    PRIMARY KEY (idPOproduct, idPOorder),
+    CONSTRAINT fk_productorder_product FOREIGN KEY (idPOproduct) REFERENCES product (idProduct),
+    CONSTRAINT fk_productorder_order FOREIGN KEY (idPOorder) REFERENCES orders (idorder),
+    CONSTRAINT check_poStatus CHECK (poStatus IN ('Disponível', 'Sem estoque'))
+) ENGINE=InnoDB;
 
-
-create table storageLocation(
-    idLproduct int,
-    idLstorage int,
-    location varchar(255) not null,
-    primary key (idLproduct, idLstorage),
-    constraint fk_storage_location_product foreign key (idLproduct) references product(idProduct),
-    constraint fk_storage_location_storage foreign key (idLstorage) references productstorage(idProdStorage)
-
-);
+CREATE TABLE storageLocation (
+    idLproduct INT,
+    idLstorage INT,
+    location VARCHAR(255) NOT NULL,
+    PRIMARY KEY (idLproduct, idLstorage),
+    CONSTRAINT fk_storage_location_product FOREIGN KEY (idLproduct) REFERENCES product (idProduct),
+    CONSTRAINT fk_storage_location_storage FOREIGN KEY (idLstorage) REFERENCES productStorage (idProdStorage)
+) ENGINE=InnoDB;

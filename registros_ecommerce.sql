@@ -15,9 +15,9 @@ VALUES (1, 1, 'Boleto', 1000),
        (2, 3, 'Cartão', 800);
 
 -- Inserção de registros na tabela orders
-INSERT INTO orders (idOrderClient, orderStatus, orderDescription, sendValue, paymentCash)
+INSERT INTO orders (client_id, orderStatus, orderDescription, sendValue, paymentCash)
 VALUES (1, 'Confirmado', 'Pedido confirmado', 20, false),
-       (2, 'En processamento', 'Aguardando processamento', 15, true);
+       (2, 'Em processamento', 'Aguardando processamento', 15, true);
 
 -- Inserção de registros na tabela productStorage
 INSERT INTO productStorage (storageLocation, quantity)
